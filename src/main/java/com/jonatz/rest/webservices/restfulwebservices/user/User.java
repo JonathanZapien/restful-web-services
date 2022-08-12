@@ -1,5 +1,6 @@
-package com.jonatz.rest.webservices.restfulwebservices;
+package com.jonatz.rest.webservices.restfulwebservices.user;
 
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,8 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class HelloWorldBean {
-  private String message;
+public class User {
+  private Integer id;
+  private String name;
+  private Date birthDate;
 }
