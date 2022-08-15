@@ -2,8 +2,11 @@ package com.jonatz.rest.webservices.restfulwebservices.exception;
 
 import com.jonatz.rest.webservices.restfulwebservices.user.UserNotFoundException;
 import java.util.Date;
+import java.util.Objects;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,9 +27,28 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
   }
 
   @ExceptionHandler(UserNotFoundException.class)
-  public final ResponseEntity<Object> handleUserNotFoundExceptions(UserNotFoundException ex, WebRequest request) {
+  public final ResponseEntity<Object> handleUserNotFoundExceptions(
+      UserNotFoundException ex, WebRequest request) {
     ExceptionResponse exceptionResponse =
         new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
     return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
+  }
+
+  @Override
+  protected ResponseEntity<Object> handleMethodArgumentNotValid(
+      MethodArgumentNotValidException ex,
+      HttpHeaders headers,
+      HttpStatus status,
+      WebRequest request) {
+    ExceptionResponse exceptionResponse =
+        new ExceptionResponse(
+            new Date(),
+            "Validation Failed.",
+            "At "
+                + Objects.requireNonNull(ex.getBindingResult().getFieldError()).getField()
+                + "field: "
+                + ex.getBindingResult().getFieldError().getDefaultMessage());
+
+    return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
   }
 }
