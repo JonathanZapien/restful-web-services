@@ -1,9 +1,14 @@
 package com.jonatz.rest.webservices.restfulwebservices.user;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import java.net.URI;
 import java.util.List;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,12 +33,17 @@ public class UserResource {
   // GET /users/{id}
   // retrieveUser(int id)
   @GetMapping("/users/{id}")
-  public User retrieveUser(@PathVariable int id) {
+  public EntityModel<User> retrieveUser(@PathVariable int id) {
     User user = service.findOne(id);
-    if(user == null){
-      throw new UserNotFoundException("id-"+id);
+    if (user == null) {
+      throw new UserNotFoundException("id-" + id);
     }
-    return user;
+    WebMvcLinkBuilder linkToUsers = linkTo(methodOn(this.getClass()).retrieveAllUsers());
+
+    EntityModel<User> model = EntityModel.of(user);
+    model.add(linkToUsers.withRel("all-users"));
+
+    return model;
   }
 
   // CREATED
@@ -44,10 +54,11 @@ public class UserResource {
     User savedUser = service.save(user);
     // CREATED
     // return URI created - /user/4
-    URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-        .path("/{id}")
-        .buildAndExpand(savedUser.getId())
-        .toUri();
+    URI location =
+        ServletUriComponentsBuilder.fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(savedUser.getId())
+            .toUri();
 
     return ResponseEntity.created(location).build();
   }
@@ -55,8 +66,8 @@ public class UserResource {
   @DeleteMapping("/users/{id}")
   public void deleteUser(@PathVariable int id) {
     User user = service.deleteById(id);
-    if(user == null){
-      throw new UserNotFoundException("id-"+id);
+    if (user == null) {
+      throw new UserNotFoundException("id-" + id);
     }
   }
 }
